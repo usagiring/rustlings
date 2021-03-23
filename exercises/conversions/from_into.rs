@@ -3,19 +3,19 @@
 // You can read more about it at https://doc.rust-lang.org/std/convert/trait.From.html
 #[derive(Debug)]
 struct Person {
-    name: String,
-    age: usize,
+  name: String,
+  age: usize,
 }
 
 // We implement the Default trait to use it as a fallback
 // when the provided string is not convertible into a Person object
 impl Default for Person {
-    fn default() -> Person {
-        Person {
-            name: String::from("John"),
-            age: 30,
-        }
+  fn default() -> Person {
+    Person {
+      name: String::from("John"),
+      age: 30,
     }
+  }
 }
 
 // Your task is to complete this implementation
@@ -33,86 +33,130 @@ impl Default for Person {
 // If while parsing the age, something goes wrong, then return the default of Person
 // Otherwise, then return an instantiated Person object with the results
 
-// I AM NOT DONE
+use std::option::Option;
 
 impl From<&str> for Person {
-    fn from(s: &str) -> Person {
+  fn from(s: &str) -> Person {
+    let v: Vec<&str> = s.split(",").collect();
+    let mut validName = Option::None;
+    let mut validAge = Option::<i32>::None;
+
+    let mut person = Person::default();
+
+    let name = v.get(0);
+    match name {
+      Some(name) => {
+        let _name = name.to_string();
+        if _name.is_empty() {
+          return person;
+        } else {
+          validName = Some(_name);
+        }
+      }
+      None => {
+        return person;
+      }
     }
+    let age = v.get(1);
+    match age {
+      Some(age) => {
+        let _age = age.parse();
+        match _age {
+          Ok(_age) => {
+            validAge = Some(_age);
+          }
+          Err(e) => {
+            return person;
+          }
+        };
+      }
+      None => {
+        return person;
+      }
+    }
+    if let Some(name) = validName {
+      person.name = name;
+    }
+    if let Some(age) = validAge {
+      person.age = age as usize;
+    }
+    person
+  }
 }
 
 fn main() {
-    // Use the `from` function
-    let p1 = Person::from("Mark,20");
-    // Since From is implemented for Person, we should be able to use Into
-    let p2: Person = "Gerald,70".into();
-    println!("{:?}", p1);
-    println!("{:?}", p2);
+  // Use the `from` function
+  let p1 = Person::from("Mark,20");
+  // Since From is implemented for Person, we should be able to use Into
+  let p2: Person = "Gerald,70".into();
+  println!("{:?}", p1);
+  println!("{:?}", p2);
 }
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    #[test]
-    fn test_default() {
-        // Test that the default person is 30 year old John
-        let dp = Person::default();
-        assert_eq!(dp.name, "John");
-        assert_eq!(dp.age, 30);
-    }
-    #[test]
-    fn test_bad_convert() {
-        // Test that John is returned when bad string is provided
-        let p = Person::from("");
-        assert_eq!(p.name, "John");
-        assert_eq!(p.age, 30);
-    }
-    #[test]
-    fn test_good_convert() {
-        // Test that "Mark,20" works
-        let p = Person::from("Mark,20");
-        assert_eq!(p.name, "Mark");
-        assert_eq!(p.age, 20);
-    }
-    #[test]
-    fn test_bad_age() {
-        // Test that "Mark,twenty" will return the default person due to an error in parsing age
-        let p = Person::from("Mark,twenty");
-        assert_eq!(p.name, "John");
-        assert_eq!(p.age, 30);
-    }
+  use super::*;
+  #[test]
+  fn test_default() {
+    // Test that the default person is 30 year old John
+    let dp = Person::default();
+    assert_eq!(dp.name, "John");
+    assert_eq!(dp.age, 30);
+  }
+  #[test]
+  fn test_bad_convert() {
+    // Test that John is returned when bad string is provided
+    let p = Person::from("");
+    assert_eq!(p.name, "John");
+    assert_eq!(p.age, 30);
+  }
+  #[test]
+  fn test_good_convert() {
+    // Test that "Mark,20" works
+    let p = Person::from("Mark,20");
+    assert_eq!(p.name, "Mark");
+    assert_eq!(p.age, 20);
+  }
+  #[test]
+  fn test_bad_age() {
+    // Test that "Mark,twenty" will return the default person due to an error in parsing age
+    let p = Person::from("Mark,twenty");
+    assert_eq!(p.name, "John");
+    assert_eq!(p.age, 30);
+  }
 
-    #[test]
-    fn test_missing_comma_and_age() {
-        let p: Person = Person::from("Mark");
-        assert_eq!(p.name, "John");
-        assert_eq!(p.age, 30);
-    }
+  #[test]
+  fn test_missing_comma_and_age() {
+    let p: Person = Person::from("Mark");
+    assert_eq!(p.name, "John");
+    assert_eq!(p.age, 30);
+  }
 
-    #[test]
-    fn test_missing_age() {
-        let p: Person = Person::from("Mark,");
-        assert_eq!(p.name, "John");
-        assert_eq!(p.age, 30);
-    }
+  #[test]
+  fn test_missing_age() {
+    let p: Person = Person::from("Mark,");
+    assert_eq!(p.name, "John");
+    assert_eq!(p.age, 30);
+  }
 
-    #[test]
-    fn test_missing_name() {
-        let p: Person = Person::from(",1");
-        assert_eq!(p.name, "John");
-        assert_eq!(p.age, 30);
-    }
+  #[test]
+  fn test_missing_name() {
+    let p: Person = Person::from(",1");
+    assert_eq!(p.name, "John");
+    assert_eq!(p.age, 30);
+  }
 
-    #[test]
-    fn test_missing_name_and_age() {
-        let p: Person = Person::from(",");
-        assert_eq!(p.name, "John");
-        assert_eq!(p.age, 30);
-    }
+  #[test]
+  fn test_missing_name_and_age() {
+    let p: Person = Person::from(",");
+    assert_eq!(p.name, "John");
+    assert_eq!(p.age, 30);
+  }
 
-    #[test]
-    fn test_missing_name_and_invalid_age() {
-        let p: Person = Person::from(",one");
-        assert_eq!(p.name, "John");
-        assert_eq!(p.age, 30);
-    }
+  #[test]
+  fn test_missing_name_and_invalid_age() {
+    let p: Person = Person::from(",one");
+    assert_eq!(p.name, "John");
+    assert_eq!(p.age, 30);
+  }
 }
