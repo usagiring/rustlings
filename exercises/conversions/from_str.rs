@@ -6,11 +6,10 @@ use std::str::FromStr;
 
 #[derive(Debug)]
 struct Person {
-    name: String,
-    age: usize,
+  name: String,
+  age: usize,
 }
 
-// I AM NOT DONE
 // Steps:
 // 1. If the length of the provided string is 0, then return an error
 // 2. Split the given string on the commas present in it
@@ -21,65 +20,105 @@ struct Person {
 // If while parsing the age, something goes wrong, then return an error
 // Otherwise, then return a Result of a Person object
 impl FromStr for Person {
-    type Err = String;
-    fn from_str(s: &str) -> Result<Person, Self::Err> {
+  type Err = String;
+  fn from_str(s: &str) -> Result<Person, Self::Err> {
+    let v: Vec<&str> = s.split(",").collect();
+    let mut validName = Option::None;
+    let mut validAge = Option::<i32>::None;
+
+    let name = v.get(0);
+    match name {
+      Some(name) => {
+        let _name = name.to_string();
+        if _name.is_empty() {
+          return Err(String::from("2132"));
+        } else {
+          validName = Some(_name);
+        }
+      }
+      None => {
+        return Err(String::from("2132"));
+      }
     }
+    let age = v.get(1);
+    match age {
+      Some(age) => {
+        let _age = age.parse();
+        match _age {
+          Ok(_age) => {
+            validAge = Some(_age);
+          }
+          Err(e) => {
+            return Err(String::from("2132"));
+          }
+        };
+      }
+      None => {
+        return Err(String::from("2132"));
+      }
+    }
+    let mut person = Person {
+      name: validName.unwrap(),
+      age: validAge.unwrap() as usize
+    };
+    Ok(person)
+  }
 }
 
 fn main() {
-    let p = "Mark,20".parse::<Person>().unwrap();
-    println!("{:?}", p);
+  let p = "Mark,20".parse::<Person>().unwrap();
+  println!("{:?}", p);
 }
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+  use super::*;
 
-    #[test]
-    fn empty_input() {
-        assert!("".parse::<Person>().is_err());
-    }
-    #[test]
-    fn good_input() {
-        let p = "John,32".parse::<Person>();
-        assert!(p.is_ok());
-        let p = p.unwrap();
-        assert_eq!(p.name, "John");
-        assert_eq!(p.age, 32);
-    }
-    #[test]
-    #[should_panic]
-    fn missing_age() {
-        "John,".parse::<Person>().unwrap();
-    }
+  #[test]
+  fn empty_input() {
+    assert!("".parse::<Person>().is_err());
+  }
+  #[test]
+  fn good_input() {
+    let p = "John,32".parse::<Person>();
+    assert!(p.is_ok());
+    let p = p.unwrap();
+    assert_eq!(p.name, "John");
+    assert_eq!(p.age, 32);
+  }
+  #[test]
+  #[should_panic]
+  fn missing_age() {
+    "John,".parse::<Person>().unwrap();
+  }
 
-    #[test]
-    #[should_panic]
-    fn invalid_age() {
-        "John,twenty".parse::<Person>().unwrap();
-    }
+  #[test]
+  #[should_panic]
+  fn invalid_age() {
+    "John,twenty".parse::<Person>().unwrap();
+  }
 
-    #[test]
-    #[should_panic]
-    fn missing_comma_and_age() {
-        "John".parse::<Person>().unwrap();
-    }
+  #[test]
+  #[should_panic]
+  fn missing_comma_and_age() {
+    "John".parse::<Person>().unwrap();
+  }
 
-    #[test]
-    #[should_panic]
-    fn missing_name() {
-        ",1".parse::<Person>().unwrap();
-    }
+  #[test]
+  #[should_panic]
+  fn missing_name() {
+    ",1".parse::<Person>().unwrap();
+  }
 
-    #[test]
-    #[should_panic]
-    fn missing_name_and_age() {
-        ",".parse::<Person>().unwrap();
-    }
+  #[test]
+  #[should_panic]
+  fn missing_name_and_age() {
+    ",".parse::<Person>().unwrap();
+  }
 
-    #[test]
-    #[should_panic]
-    fn missing_name_and_invalid_age() {
-        ",one".parse::<Person>().unwrap();
-    }
+  #[test]
+  #[should_panic]
+  fn missing_name_and_invalid_age() {
+    ",one".parse::<Person>().unwrap();
+  }
 }
